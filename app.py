@@ -1,6 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
-from PIL import Image
 import base64
 from datetime import datetime, timezone
 
@@ -8,96 +6,140 @@ from datetime import datetime, timezone
 st.set_page_config(
     page_title="ResumeAI - Smart Resume Customization",
     page_icon="📄",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# Version info and last updated
-VERSION = "1.0.0"
-LAST_UPDATED = "2025-01-04"
-
-# Custom CSS
-def local_css():
-    st.markdown("""
-        <style>
-        .stApp {
-            background-color: #f8f9fa;
+# Custom CSS with !important tags and direct element styling
+st.markdown("""
+    <style>
+        /* Main Page Styling */
+        .main {
+            padding: 2em;
         }
         
-        .custom-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 1rem 0;
-        }
-        
+        /* Header Styling */
         .main-header {
-            font-size: 3.5rem;
-            font-weight: 700;
-            color: #1a73e8;
-            text-align: center;
-            margin-bottom: 1rem;
+            color: #1a73e8 !important;
+            font-family: 'Helvetica Neue', sans-serif !important;
+            font-size: 3.5em !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+            padding: 1em 0 0.5em 0 !important;
+            margin-bottom: 0.5em !important;
         }
         
         .sub-header {
-            font-size: 1.5rem;
-            color: #5f6368;
-            text-align: center;
-            margin-bottom: 2rem;
+            color: #5f6368 !important;
+            font-family: 'Helvetica Neue', sans-serif !important;
+            font-size: 1.5em !important;
+            text-align: center !important;
+            margin-bottom: 2em !important;
         }
         
+        /* Section Headers */
+        h2 {
+            color: #1a73e8 !important;
+            font-family: 'Helvetica Neue', sans-serif !important;
+            font-size: 2em !important;
+            text-align: center !important;
+            margin: 1.5em 0 !important;
+            padding-top: 1em !important;
+        }
+        
+        /* Feature Cards */
         .feature-card {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            height: 100%;
+            background-color: white !important;
+            padding: 2em !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+            height: 100% !important;
+            margin: 1em !important;
+            transition: transform 0.3s ease !important;
         }
         
+        .feature-card:hover {
+            transform: translateY(-5px) !important;
+        }
+        
+        /* Pricing Cards */
         .pricing-card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            height: 100%;
+            background-color: white !important;
+            padding: 2em !important;
+            border-radius: 15px !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+            text-align: center !important;
+            height: 100% !important;
+            margin: 1em !important;
+            transition: transform 0.3s ease !important;
         }
         
+        .pricing-card:hover {
+            transform: translateY(-5px) !important;
+        }
+        
+        /* Buttons */
         .cta-button {
-            background-color: #1a73e8;
-            color: white;
-            padding: 0.8rem 2rem;
-            border-radius: 2rem;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            margin: 1rem 0;
-            text-align: center;
+            background-color: #1a73e8 !important;
+            color: white !important;
+            padding: 0.8em 2em !important;
+            border-radius: 30px !important;
+            text-decoration: none !important;
+            font-weight: 600 !important;
+            display: inline-block !important;
+            margin: 1em 0 !important;
+            transition: background-color 0.3s ease !important;
         }
         
         .cta-button:hover {
-            background-color: #1557b0;
-            color: white;
+            background-color: #1557b0 !important;
+            text-decoration: none !important;
+            color: white !important;
         }
-        </style>
-    """)
+        
+        /* Lists */
+        ul {
+            list-style-type: none !important;
+            padding: 0 !important;
+        }
+        
+        li {
+            margin: 0.5em 0 !important;
+            color: #5f6368 !important;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center !important;
+            padding: 2em !important;
+            margin-top: 3em !important;
+            border-top: 1px solid #eee !important;
+        }
+        
+        /* Hide Streamlit branding */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stDeployButton {display:none;}
+        
+        /* Divider */
+        hr {
+            margin: 2em 0 !important;
+            border-color: #eee !important;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-header {
+                font-size: 2.5em !important;
+            }
+            .sub-header {
+                font-size: 1.2em !important;
+            }
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-def footer():
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown(f"Version: {VERSION}")
-    with col2:
-        st.markdown(f"Last Updated: {LAST_UPDATED}")
-    with col3:
-        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-        st.markdown(f"Current Time: {current_time}")
-
-def main():
-    local_css()
-    
-    # Hero Section
+def create_hero_section():
     st.markdown('<h1 class="main-header">Transform Your Resume with AI</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Get a perfectly tailored resume for every job application in seconds</p>', unsafe_allow_html=True)
     
@@ -109,119 +151,128 @@ def main():
                 <a href="#" class="cta-button">Try It Free</a>
             </div>
         """, unsafe_allow_html=True)
+
+def create_how_it_works():
+    st.markdown('<h2>How It Works</h2>', unsafe_allow_html=True)
     
-    # How It Works Section
-    st.markdown("---")
-    st.markdown('<h2 style="text-align: center;">How It Works</h2>', unsafe_allow_html=True)
+    cols = st.columns(3)
     
-    col1, col2, col3 = st.columns(3)
+    steps = [
+        {
+            "title": "1. Upload Resume",
+            "description": "Simply upload your existing resume in any common format (PDF, DOCX, etc.)"
+        },
+        {
+            "title": "2. Add Job Link",
+            "description": "Paste the LinkedIn job posting URL you're interested in"
+        },
+        {
+            "title": "3. Get Your Custom Resume",
+            "description": "Receive your tailored resume optimized for the specific job in seconds"
+        }
+    ]
     
-    with col1:
-        st.markdown("""
-            <div class="feature-card">
-                <h3>1. Upload Resume</h3>
-                <p>Simply upload your existing resume in any common format (PDF, DOCX, etc.)</p>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-            <div class="feature-card">
-                <h3>2. Add Job Link</h3>
-                <p>Paste the LinkedIn job posting URL you're interested in</p>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-            <div class="feature-card">
-                <h3>3. Get Your Custom Resume</h3>
-                <p>Receive your tailored resume optimized for the specific job in seconds</p>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    # Features Section
-    st.markdown("---")
-    st.markdown('<h2 style="text-align: center;">Key Features</h2>', unsafe_allow_html=True)
+    for col, step in zip(cols, steps):
+        with col:
+            st.markdown(f"""
+                <div class="feature-card">
+                    <h3>{step['title']}</h3>
+                    <p>{step['description']}</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+def create_features():
+    st.markdown('<h2>Key Features</h2>', unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-            <div class="custom-container">
+            <div class="feature-card">
                 <h3>AI-Powered Customization</h3>
                 <ul>
-                    <li>Smart keyword optimization</li>
-                    <li>Skills matching</li>
-                    <li>Experience highlighting</li>
-                    <li>ATS-friendly formatting</li>
+                    <li>✨ Smart keyword optimization</li>
+                    <li>🎯 Skills matching</li>
+                    <li>📊 Experience highlighting</li>
+                    <li>✅ ATS-friendly formatting</li>
                 </ul>
             </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-            <div class="custom-container">
+            <div class="feature-card">
                 <h3>Professional Features</h3>
                 <ul>
-                    <li>Multiple format export options</li>
-                    <li>Version history</li>
-                    <li>Real-time preview</li>
-                    <li>One-click application ready</li>
+                    <li>📁 Multiple format export options</li>
+                    <li>🔄 Version history</li>
+                    <li>👁️ Real-time preview</li>
+                    <li>🚀 One-click application ready</li>
                 </ul>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    # Pricing Section
-    st.markdown("---")
-    st.markdown('<h2 style="text-align: center;">Pricing Plans</h2>', unsafe_allow_html=True)
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("""
-            <div class="pricing-card">
-                <h3>Basic</h3>
-                <h2>Free</h2>
-                <ul style="list-style-type: none; padding: 0;">
-                    <li>3 resume customizations/month</li>
-                    <li>Basic formatting</li>
-                    <li>PDF export</li>
-                </ul>
-                <a href="#" class="cta-button">Start Free</a>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-            <div class="pricing-card" style="border: 2px solid #1a73e8;">
-                <h3>Pro</h3>
-                <h2>$19/month</h2>
-                <ul style="list-style-type: none; padding: 0;">
-                    <li>Unlimited customizations</li>
-                    <li>Advanced AI optimization</li>
-                    <li>All export formats</li>
-                    <li>Priority support</li>
-                </ul>
-                <a href="#" class="cta-button">Go Pro</a>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-            <div class="pricing-card">
-                <h3>Enterprise</h3>
-                <h2>Custom</h2>
-                <ul style="list-style-type: none; padding: 0;">
-                    <li>Team management</li>
-                    <li>API access</li>
-                    <li>Custom integration</li>
-                    <li>Dedicated support</li>
-                </ul>
-                <a href="#" class="cta-button">Contact Us</a>
             </div>
         """, unsafe_allow_html=True)
 
+def create_pricing():
+    st.markdown('<h2>Pricing Plans</h2>', unsafe_allow_html=True)
+    
+    cols = st.columns(3)
+    
+    plans = [
+        {
+            "name": "Basic",
+            "price": "Free",
+            "features": ["3 resume customizations/month", "Basic formatting", "PDF export"],
+            "cta": "Start Free",
+            "highlight": False
+        },
+        {
+            "name": "Pro",
+            "price": "$19/month",
+            "features": ["Unlimited customizations", "Advanced AI optimization", "All export formats", "Priority support"],
+            "cta": "Go Pro",
+            "highlight": True
+        },
+        {
+            "name": "Enterprise",
+            "price": "Custom",
+            "features": ["Team management", "API access", "Custom integration", "Dedicated support"],
+            "cta": "Contact Us",
+            "highlight": False
+        }
+    ]
+    
+    for col, plan in zip(cols, plans):
+        with col:
+            style = 'border: 2px solid #1a73e8;' if plan['highlight'] else ''
+            st.markdown(f"""
+                <div class="pricing-card" style="{style}">
+                    <h3>{plan['name']}</h3>
+                    <h2>{plan['price']}</h2>
+                    <ul>
+                        {''.join(f'<li>{feature}</li>' for feature in plan['features'])}
+                    </ul>
+                    <a href="#" class="cta-button">{plan['cta']}</a>
+                </div>
+            """, unsafe_allow_html=True)
+
+def footer():
+    st.markdown("---")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("Version: 1.0.0")
+    with col2:
+        st.markdown("Last Updated: 2025-01-04")
+    with col3:
+        current_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        st.markdown(f"Current Time: {current_time}")
+
+def main():
+    create_hero_section()
+    create_how_it_works()
+    create_features()
+    create_pricing()
+    footer()
+
 if __name__ == "__main__":
     main()
-    footer()
